@@ -96,10 +96,11 @@ int ADAM4051::read_coils() {
     return 0;
 }
 
-ADAM4168::ADAM4168(const ADAM& adam, int slave_id, int total_channels)
+ADAM4168::ADAM4168(const ADAM& adam, int slave_id, int total_channels, float duty_cycles)
          : ADAM(adam.device, adam.baud, adam.check, adam.data_bit, adam.stop_bit) {
     this->slave_id = slave_id;
     this->total_channels = total_channels;
+    InitPulse(duty_cycles); // 初始化脉冲频率
 }
 ADAM4168::~ADAM4168() {}
 
@@ -111,6 +112,7 @@ ADAM4168::~ADAM4168() {}
  */
 int ADAM4168::InitPulse(float duty_cycles) {
     connect(false, this->slave_id); // 连接从机
+    SetMode({}); // 清空模式设置,否则写入脉冲频率会打开脉冲
     // 修改脉冲输出频率 （32bit）
     vector<uint16_t> Toffs(16, 0);
     vector<uint16_t> Tons(16, 0);
@@ -159,6 +161,7 @@ int ADAM4168::SetMode(const vector<int>& PulseChannel) {
  * @return int 
  */
 int ADAM4168::StartPulse(const vector<int>& channels, uint16_t pulse_times) {
+    connect(false, this->slave_id); // 连接从机
     SetMode(channels); // 设置指定通道为脉冲输出模式
     
     // 设置脉冲输出次数 （32bit）
@@ -176,6 +179,7 @@ int ADAM4168::StartPulse(const vector<int>& channels, uint16_t pulse_times) {
 }
 
 int ADAM4168::SetDO(int channels, bool value) {
+    connect(false, this->slave_id); // 连接从机
     // 设置脉冲输出次数 （32bit）
     if(modbus_write_bit(ctx, 16 + channels, value) == -1) {
         cout << "Failed to write registers: " << modbus_strerror(errno) << endl;

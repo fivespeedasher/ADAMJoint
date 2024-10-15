@@ -40,28 +40,51 @@ int main() {
 
     int slave_ID_4 = 4; // 从机地址
     int slave_ID_5 = 5;
+    int slave_ID_6 = 6;
     int totalDI_4 = 16; // 从机DI总数
     int totalDI_5 = 16;
+    int totalCH_6 = 8; // 从机通道总数
+    int duty_cycles = 0.5; // 脉冲占空比
     ADAM4051 adam_4(adamPort1, slave_ID_4, totalDI_4);
     ADAM4051 adam_5(adamPort1, slave_ID_5, totalDI_5);
+    ADAM4168 adam_6(adamPort1, slave_ID_6, totalCH_6, duty_cycles);
 
+    // 脉冲输出参数
+    const int LEFT = 2; // 左转向引脚通道
+    const int RIGHT = 0; // 右转向引脚通道
+    const uint16_t Blink = 3;  // 闪烁次数
+    
+    // 电平输出参数
+    const uint16_t RUN = 1; // 行车灯
+    bool RUN_status = true; // 行车灯状态
+
+    adam_6.SetDO(RUN, RUN_status); // 打开行车灯
     while(true) {
         if(adam_4.read_coils() != -1) {
             vector<uint8_t> state_coils_4 = adam_4.state_coils;
-            cout << "ADAM-4051(4): ";
-            // 4051COM悬空时，DI=1表示接收到了低电平
-            for(auto coil: state_coils_4) {
-                cout << static_cast<int>(coil) << " ";
+            // cout << "ADAM-4051(4): ";
+            // // 4051COM悬空时，DI=1表示接收到了低电平
+            // for(auto coil: state_coils_4) {
+            //     cout << static_cast<int>(coil) << " ";
+            // }
+            // cout << endl;
+            if(state_coils_4[0] == 1) {
+                // 启动左转向灯
+                vector<int> PulseChannel = {RIGHT}; // 脉冲通道
+                adam_6.StartPulse(PulseChannel, Blink); // 打开转向
             }
-            cout << endl;
         }
         if(adam_5.read_coils() != -1) {
             vector<uint8_t> state_coils_5 = adam_5.state_coils;
-            cout << "ADAM-4051(5): ";
-            for(auto coil: state_coils_5) {
-                cout << static_cast<int>(coil) << " ";
+            // cout << "ADAM-4051(5): ";
+            // for(auto coil: state_coils_5) {
+            //     cout << static_cast<int>(coil) << " ";
+            // }
+            // cout << endl;
+            if(state_coils_5[0] == 1) {
+                RUN_status = !RUN_status;
+                adam_6.SetDO(RUN, RUN_status); // 打开行车灯
             }
-            cout << endl;
         }
 
         sleep(1);

@@ -41,7 +41,7 @@ private:
 class ADAM4168 : public ADAM
 {
 public:
-    ADAM4168(const ADAM& adam, int slave_id, int total_channels);
+    ADAM4168(const ADAM& adam, int slave_id, int total_channels, float duty_cycles);
     ~ADAM4168();
     int InitPulse(float duty_cycles);
     int SetMode(const vector<int>& PulseChannel);
