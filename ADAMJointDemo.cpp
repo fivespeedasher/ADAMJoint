@@ -6,6 +6,7 @@
 #include <termios.h>
 #include <fcntl.h>
 #include <string.h>
+#include "ADAM.h"
 
 using namespace std;
 
@@ -35,62 +36,33 @@ bool kbhit() {
 }
 
 int main() {
-    string device = "/dev/ttyUSB0";
-    int baud = 9600;
-    int check = 'N';
-    int data_bit = 8;
-    int stop_bit = 1;
-    int slave_id = 4;
-    modbus_t *ctx = nullptr;
-    int total_coils = 16; // 读取线圈总数（DI总数）
-    vector<uint8_t> state_coils(total_coils, false); // 线圈状态
+    string device1 = string("/dev/ttyUSB0");
 
-    // 打开端口
-    ctx = modbus_new_rtu(device.c_str(), baud, check, data_bit, stop_bit);
-    if(ctx == nullptr) {
-        cout << "Unable to create the libmodbus context: " << modbus_strerror(errno) << endl;
-        return -1;
+    // 基类ADAM: 放置串口连接的参数
+    ADAM adamPort1(device1, 9600, 'N', 8, 1);
+
+    // 初始化通道
+    int slave_ID_6 = 6; // 从机地址
+    int totalCH_6 = 8; // 从机通道总数
+    float duty_cycles = 0.5; // 脉冲占空比
+
+    // 初始化
+    ADAM4168 adam_6(adamPort1, slave_ID_6, totalCH_6);
+    if(adam_6.InitPulse(duty_cycles) == 0) {
+        cout << "Set pulse channel successfully!" << endl;
     }
 
-    // 设置从机地址
-    modbus_set_slave(ctx, slave_id);
-
-    // connect
-    if(modbus_connect(ctx) == -1) {
-        cout << "Connection to slave failed: " << modbus_strerror(errno) << endl;
-        modbus_free(ctx);
-        modbus_close(ctx);
-        return -1;
-    }
+    // 脉冲输出参数
+    const int LEFT = 3; // 左转向引脚通道
+    const int RIGHT = 0; // 右转向引脚通道
+    const uint16_t Blink = 3;  // 闪烁次数
     
-    // 设置应答延时1s
-    modbus_set_response_timeout(ctx, 0 ,1000000);
+    // 电平输出参数
+    const uint16_t RUN = 1; // 行车灯
 
-    // 启用调试模式
-    modbus_set_debug(ctx, TRUE);
-
-    // 读取线圈状态
-    while(1) {
-        if(modbus_read_bits(ctx, 0, total_coils, state_coils.data()) == -1) {
-            cout << "Failed to read coils: " << modbus_strerror(errno) << endl;
-            modbus_close(ctx);
-            modbus_free(ctx);
-            return -1;
-        }
-        cout << "Coils status: ";
-        for(auto coil: state_coils) {
-            cout << static_cast<int>(coil) << " ";
-        }
-        cout << endl << endl;
-        sleep(1); // 1s
-
-        // 检查是否有按键按下
-        if (kbhit()) {
-            cout << "Key pressed, exiting..." << endl;
-            break;
-        }
-    }
-    modbus_close(ctx);
-    modbus_free(ctx);
+    vector<int> PulseChannel = {RIGHT}; // 脉冲通道
+    adam_6.StartPulse(PulseChannel, Blink); // 打开转向
+    adam_6.SetDO(RUN, false); // 打开行车灯
+    adamPort1.disconnect();
     return 0;
 }

@@ -45,14 +45,11 @@ int main() {
     ADAM4051 adam_4(adamPort1, slave_ID_4, totalDI_4);
     ADAM4051 adam_5(adamPort1, slave_ID_5, totalDI_5);
 
-    // adam_4.connect(false); // 以不调试的形式连接
-    // adam_5.connect(false);
-    // adamPort1.connect(false); // 以不调试的形式连接
-
     while(true) {
         if(adam_4.read_coils() != -1) {
             vector<uint8_t> state_coils_4 = adam_4.state_coils;
             cout << "ADAM-4051(4): ";
+            // 4051COM悬空时，DI=1表示接收到了低电平
             for(auto coil: state_coils_4) {
                 cout << static_cast<int>(coil) << " ";
             }
