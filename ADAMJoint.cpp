@@ -1,4 +1,5 @@
 #include "ADAM.h"
+#include "BulbConstants.h"
 #include <iostream>
 #include <vector>
 #include <termios.h> //TCSANOW
@@ -49,13 +50,14 @@ int main() {
     ADAM4051 adam_5(adamPort1, slave_ID_5, totalDI_5);
     ADAM4168 adam_6(adamPort1, slave_ID_6, totalCH_6, duty_cycles);
 
-    // 脉冲输出参数
-    const int LEFT = 2; // 左转向引脚通道
-    const int RIGHT = 0; // 右转向引脚通道
-    const uint16_t Blink = 3;  // 闪烁次数
+    // // 脉冲输出参数
+    // const int LEFT = 2; // 左转向引脚通道
+    // const int RIGHT = 0; // 右转向引脚通道
+    // const uint16_t Blink = 3;  // 闪烁次数
     
-    // 电平输出参数
-    const uint16_t RUN = 1; // 行车灯
+    // // 电平输出参数
+    // const uint16_t RUN = 1; // 行车灯
+    
     bool RUN_status = true; // 行车灯状态
 
     adam_6.SetDO(RUN, RUN_status); // 打开行车灯

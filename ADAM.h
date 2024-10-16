@@ -53,4 +53,19 @@ private:
     using ADAM::connect; // 防止派生类外部访问，using在派生类中用于改变基类成员的访问权限，不需写形参
     using ADAM::disconnect; 
 };
+
+class ADAM4068 : public ADAM
+{
+public:
+    ADAM4068(const ADAM& adam, int slave_id, int total_coils);
+    ~ADAM4068();
+    vector<uint8_t> state_coils;
+    int write_coil(int ch, bool flag);
+private:
+    int slave_id;
+    int total_coils;
+    using ADAM::connect; // 防止派生类外部访问，using在派生类中用于改变基类成员的访问权限，不需写形参
+    using ADAM::disconnect; 
+};
+
 #endif

@@ -189,3 +189,31 @@ int ADAM4168::SetDO(int channels, bool value) {
     }
     return 0;
 }
+
+ADAM4068::ADAM4068(const ADAM& adam, int slave_id, int total_coils)
+         : ADAM(adam.device, adam.baud, adam.check, adam.data_bit, adam.stop_bit) {
+    this->slave_id = slave_id;
+    this->total_coils = total_coils;
+    this->state_coils = vector<uint8_t>(total_coils, false);
+}
+ADAM4068::~ADAM4068() {}
+
+/**
+ * @brief 写单个通道（写入位置为线圈）
+ * 
+ * @param ch 通道
+ * @param flag 通道状态
+ * @return int 
+ */
+int ADAM4068::write_coil(int ch, bool flag) {
+    connect(false, this->slave_id); // 连接从机
+    int mapped_ch = 16 + ch;
+    // 16~23是modbus上的地址，0~7是用户输入的地址
+    if(modbus_write_bit(ctx, mapped_ch, flag) == -1) {
+        cout << "Failed to write coil: " << modbus_strerror(errno) << endl;
+        modbus_close(ctx);
+        modbus_free(ctx);
+        return -1;
+    }
+    return 0;
+}
