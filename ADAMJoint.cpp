@@ -60,7 +60,7 @@ int main() {
     
     bool RUN_status = true; // 行车灯状态
 
-    adam_6.SetDO(RUN, RUN_status); // 打开行车灯
+    adam_6.SetDO(RUNNING_LIGHT, RUN_status); // 打开行车灯
     while(true) {
         if(adam_4.read_coils() != -1) {
             vector<uint8_t> state_coils_4 = adam_4.state_coils;
@@ -72,8 +72,8 @@ int main() {
             // cout << endl;
             if(state_coils_4[0] == 1) {
                 // 启动左转向灯
-                vector<int> PulseChannel = {RIGHT}; // 脉冲通道
-                adam_6.StartPulse(PulseChannel, Blink); // 打开转向
+                vector<int> PulseChannel = {TURNING}; // 脉冲通道
+                adam_6.StartPulse(PulseChannel, BLINK); // 打开转向
             }
         }
         if(adam_5.read_coils() != -1) {
@@ -85,7 +85,7 @@ int main() {
             // cout << endl;
             if(state_coils_5[0] == 1) {
                 RUN_status = !RUN_status;
-                adam_6.SetDO(RUN, RUN_status); // 打开行车灯
+                adam_6.SetDO(RUNNING_LIGHT, RUN_status); // 打开行车灯
             }
         }
 
