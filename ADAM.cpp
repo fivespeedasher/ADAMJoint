@@ -1,6 +1,4 @@
-/***
- * 用于读取的信号
- */
+// 采用Modbus-RTU连接
 
 #include <iostream>
 #include <errno.h>
